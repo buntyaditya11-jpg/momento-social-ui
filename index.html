@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Momento — Social Media</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: #2a2a3a;
+    --accent: #7c5cfc;
+    --accent2: #fc5c7d;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --success: #5cfca0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 20px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 32px;
+    letter-spacing: -1px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--muted);
+    border: 1px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(124,92,252,0.15), rgba(252,92,125,0.08));
+    color: var(--text);
+    border-color: rgba(124,92,252,0.3);
+  }
+  .nav-item .icon { font-size: 20px; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent2);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .user-card:hover { background: var(--surface2); }
+  .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #fff;
+    flex-shrink: 0;
+  }
+  .avatar.sm { width: 32px; height: 32px; font-size: 13px; }
+  .avatar.lg { width: 54px; height: 54px; font-size: 22px; }
+  .user-info .name { font-weight: 600; font-size: 14px; }
+  .user-info .handle { color: var(--muted); font-size: 12px; }
+
+  /* Main Content */
+  .main {
+    margin-left: 260px;
+    flex: 1;
+    display: flex;
+    max-width: calc(100% - 260px);
+  }
+  .feed {
+    flex: 1;
+    max-width: 620px;
+    padding: 32px 24px;
+    border-right: 1px solid var(--border);
+  }
+
+  /* Stories */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+  .stories {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 32px;
+    scrollbar-width: none;
+  }
+  .stories::-webkit-scrollbar { display: none; }
+  .story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    animation: fadeUp 0.4s ease both;
+  }
+  .story-ring {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    padding: 2px;
+    transition: transform 0.2s;
+  }
+  .story-ring:hover { transform: scale(1.08); }
+  .story-ring.add {
+    background: var(--surface2);
+    border: 2px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--muted);
+  }
+  .story-inner {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .story span { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+  /* Create Post */
+  .create-post {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+  .create-post textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    resize: none;
+    line-height: 1.6;
+    min-height: 60px;
+  }
+  .create-post textarea::placeholder { color: var(--muted); }
+  .post-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .post-btn-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .post-btn-icon:hover { color: var(--accent); border-color: var(--accent); }
+  .btn-primary {
+    margin-left: auto;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
+
+  /* Post Card */
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.5s ease both;
+    transition: border-color 0.2s;
+  }
+  .post-card:hover { border-color: rgba(124,92,252,0.3); }
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .post-meta .name { font-weight: 600; font-size: 14px; }
+  .post-meta .sub { color: var(--muted); font-size: 12px; }
+  .post-menu { margin-left: auto; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
+  .post-text { font-size: 15px; line-height: 1.7; color: var(--text); margin-bottom: 14px; }
+  .post-tag { color: var(--accent); font-weight: 500; }
+  .post-image {
+    width: 100%;
+    height: 220px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px;
+  }
+  .post-footer {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    transition: all 0.2s;
+    user-select: none;
+    border: none; background: transparent;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .action-btn:hover { background: var(--surface2); color: var(--text); }
+  .action-btn.liked { color: var(--accent2); }
+  .action-btn .ic { font-size: 16px; }
+  .action-share { margin-left: auto; }
+
+  /* Right Panel */
+  .right-panel {
+    width: 300px;
+    padding: 32px 20px;
+    flex-shrink: 0;
+  }
+  .widget {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .widget-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .trend-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .trend-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .trend-item:hover .trend-tag { color: var(--accent); }
+  .trend-tag { font-weight: 600; font-size: 14px; transition: color 0.2s; }
+  .trend-count { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .suggest-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+  .suggest-info { flex: 1; }
+  .suggest-info .name { font-size: 14px; font-weight: 600; }
+  .suggest-info .handle { color: var(--muted); font-size: 12px; }
+  .btn-follow {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-follow:hover, .btn-follow.following {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-follow.following { background: var(--accent2); border-color: var(--accent2); }
+
+  /* Notification dot */
+  .dot {
+    width: 8px; height: 8px;
+    background: var(--accent2);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Like animation */
+  .heart-pop { animation: heartPop 0.3s ease; }
+  @keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 16px;
+    width: 220px;
+    transition: border-color 0.2s;
+  }
+  .search-bar:focus-within { border-color: var(--accent); }
+  .search-bar input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    width: 100%;
+  }
+  .search-bar input::placeholder { color: var(--muted); }
+  .search-icon { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">📸 Momento</div>
+
+  <div class="nav-item active" onclick="setActive(this)"><span class="icon">🏠</span> Home</div>
+  <div class="nav-item" onclick="setActive(this)"><span class="icon">🔍</span> Explore</div>
+  <div class="nav-item" onclick="setActive(this)"><span class="icon">🔔</span> Notifications <span class="nav-badge">4</span></div>
+  <div class="nav-item" onclick="setActive(this)"><span class="icon">✉️</span> Messages <span class="nav-badge">2</span></div>
+  <div class="nav-item" onclick="setActive(this)"><span class="icon">🔖</span> Bookmarks</div>
+  <div class="nav-item" onclick="setActive(this)"><span class="icon">👤</span> Profile</div>
+  <div class="nav-item" onclick="setActive(this)"><span class="icon">⚙️</span> Settings</div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="name">Aditya Dixit</div>
+        <div class="handle">@adityadixit</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Feed -->
+  <div class="feed">
+    <div class="topbar">
+      <div class="section-title">Home Feed</div>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search Momento..." />
+      </div>
+    </div>
+
+    <!-- Stories -->
+    <div class="stories">
+      <div class="story">
+        <div class="story-ring add">＋</div>
+        <span>Your Story</span>
+      </div>
+      <div class="story" onclick="viewStory(this)">
+        <div class="story-ring"><div class="story-inner">🌙</div></div>
+        <span>luna.k</span>
+      </div>
+      <div class="story" onclick="viewStory(this)">
+        <div class="story-ring"><div class="story-inner">🎨</div></div>
+        <span>artboy</span>
+      </div>
+      <div class="story" onclick="viewStory(this)">
+        <div class="story-ring"><div class="story-inner">🏄</div></div>
+        <span>surfmax</span>
+      </div>
+      <div class="story" onclick="viewStory(this)">
+        <div class="story-ring"><div class="story-inner">📸</div></div>
+        <span>pixel.jo</span>
+      </div>
+      <div class="story" onclick="viewStory(this)">
+        <div class="story-ring"><div class="story-inner">🎵</div></div>
+        <span>beatlab</span>
+      </div>
+    </div>
+
+    <!-- Create Post -->
+    <div class="create-post">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div class="avatar">A</div>
+        <textarea id="postInput" placeholder="What's on your mind, Aditya?"></textarea>
+      </div>
+      <div class="post-actions">
+        <div class="post-btn-icon" title="Image">🖼️</div>
+        <div class="post-btn-icon" title="Emoji">😊</div>
+        <div class="post-btn-icon" title="Location">📍</div>
+        <div class="post-btn-icon" title="Poll">📊</div>
+        <button class="btn-primary" onclick="createPost()">Publish</button>
+      </div>
+    </div>
+
+    <!-- Posts -->
+    <div id="feed">
+
+      <div class="post-card" style="animation-delay:0.1s">
+        <div class="post-header">
+          <div class="avatar" style="background:linear-gradient(135deg,#5c8afc,#5cfca0)">L</div>
+          <div class="post-meta">
+            <div class="name">Luna Kim</div>
+            <div class="sub">@luna.k · 2h ago</div>
+          </div>
+          <div class="post-menu" onclick="toggleMenu(this)">···</div>
+        </div>
+        <div class="post-text">
+          Just shipped my new design system after 3 months of work 🎉 
+          Open source and free forever. <span class="post-tag">#design</span> <span class="post-tag">#opensource</span>
+        </div>
+        <div class="post-image">🎨</div>
+        <div class="post-footer">
+          <button class="action-btn" onclick="toggleLike(this)"><span class="ic">🤍</span> 248</button>
+          <button class="action-btn" onclick="focusComment()"><span class="ic">💬</span> 34</button>
+          <button class="action-btn"><span class="ic">🔁</span> 89</button>
+          <button class="action-btn action-share"><span class="ic">↗️</span> Share</button>
+        </div>
+      </div>
+
+      <div class="post-card" style="animation-delay:0.2s">
+        <div class="post-header">
+          <div class="avatar" style="background:linear-gradient(135deg,#fc5c7d,#fca95c)">R</div>
+          <div class="post-meta">
+            <div class="name">Rina Patel</div>
+            <div class="sub">@rina.dev · 5h ago</div>
+          </div>
+          <div class="post-menu" onclick="toggleMenu(this)">···</div>
+        </div>
+        <div class="post-text">
+          Hot take: Consistency beats talent. Show up every day, ship things, iterate, repeat. That's the whole game.
+          <span class="post-tag">#buildinpublic</span> <span class="post-tag">#startups</span>
+        </div>
+        <div class="post-footer">
+          <button class="action-btn liked" onclick="toggleLike(this)"><span class="ic">❤️</span> 1.2k</button>
+          <button class="action-btn"><span class="ic">💬</span> 178</button>
+          <button class="action-btn"><span class="ic">🔁</span> 412</button>
+          <button class="action-btn action-share"><span class="ic">↗️</span> Share</button>
+        </div>
+      </div>
+
+      <div class="post-card" style="animation-delay:0.3s">
+        <div class="post-header">
+          <div class="avatar" style="background:linear-gradient(135deg,#5cfca0,#5ceafc)">M</div>
+          <div class="post-meta">
+            <div class="name">Max Ortega</div>
+            <div class="sub">@surfmax · 8h ago</div>
+          </div>
+          <div class="post-menu" onclick="toggleMenu(this)">···</div>
+        </div>
+        <div class="post-text">
+          Morning surf was absolutely 🔥 Nothing beats a 6am session when the waves are glassy and the beach is empty. Life is good. <span class="post-tag">#surfing</span> <span class="post-tag">#mornings</span>
+        </div>
+        <div class="post-image">🏄</div>
+        <div class="post-footer">
+          <button class="action-btn" onclick="toggleLike(this)"><span class="ic">🤍</span> 573</button>
+          <button class="action-btn"><span class="ic">💬</span> 62</button>
+          <button class="action-btn"><span class="ic">🔁</span> 44</button>
+          <button class="action-btn action-share"><span class="ic">↗️</span> Share</button>
+        </div>
+      </div>
+
+    </div><!-- end feed -->
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <!-- Trends -->
+    <div class="widget">
+      <div class="widget-title">🔥 Trending Now</div>
+      <div class="trend-item">
+        <div class="trend-tag">#OpenSourceMonth</div>
+        <div class="trend-count">48.2K posts</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-tag">#DesignSystems</div>
+        <div class="trend-count">22.7K posts</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-tag">#BuildInPublic</div>
+        <div class="trend-count">19.1K posts</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-tag">#WebDev2025</div>
+        <div class="trend-count">14.5K posts</div>
+      </div>
+      <div class="trend-item">
+        <div class="trend-tag">#AITools</div>
+        <div class="trend-count">11.3K posts</div>
+      </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="widget">
+      <div class="widget-title">✨ Who to Follow</div>
+      <div class="suggest-item">
+        <div class="avatar sm" style="background:linear-gradient(135deg,#a05cfc,#fc5c7d)">J</div>
+        <div class="suggest-info">
+          <div class="name">Jiro Tanaka</div>
+          <div class="handle">@jiro.type</div>
+        </div>
+        <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
+      </div>
+      <div class="suggest-item">
+        <div class="avatar sm" style="background:linear-gradient(135deg,#5caafc,#5cfc8f)">S</div>
+        <div class="suggest-info">
+          <div class="name">Sara Ellis</div>
+          <div class="handle">@saraui</div>
+        </div>
+        <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
+      </div>
+      <div class="suggest-item">
+        <div class="avatar sm" style="background:linear-gradient(135deg,#fccd5c,#fc815c)">D</div>
+        <div class="suggest-info">
+          <div class="name">Dev Sharma</div>
+          <div class="handle">@devsharma</div>
+        </div>
+        <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
+      </div>
+      <div class="suggest-item">
+        <div class="avatar sm" style="background:linear-gradient(135deg,#fc5c5c,#fc5ca5)">P</div>
+        <div class="suggest-info">
+          <div class="name">Priya Nair</div>
+          <div class="handle">@priya.design</div>
+        </div>
+        <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
+      </div>
+    </div>
+
+    <!-- Stats Card -->
+    <div class="widget">
+      <div class="widget-title">📊 Your Activity</div>
+      <div style="display:flex;justify-content:space-between;text-align:center;">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;">284</div>
+          <div style="color:var(--muted);font-size:12px;">Following</div>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;">1.4k</div>
+          <div style="color:var(--muted);font-size:12px;">Followers</div>
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;">56</div>
+          <div style="color:var(--muted);font-size:12px;">Posts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function toggleLike(btn) {
+    const liked = btn.classList.contains('liked');
+    const ic = btn.querySelector('.ic');
+    const countText = btn.textContent.trim();
+    const match = countText.match(/([\d.,k]+)$/i);
+    if (!match) return;
+    let num = parseNum(match[1]);
+    if (liked) {
+      btn.classList.remove('liked');
+      ic.textContent = '🤍';
+      num--;
+    } else {
+      btn.classList.add('liked');
+      ic.textContent = '❤️';
+      ic.classList.add('heart-pop');
+      setTimeout(() => ic.classList.remove('heart-pop'), 300);
+      num++;
+    }
+    btn.innerHTML = `<span class="ic">${ic.textContent}</span> ${formatNum(num)}`;
+  }
+
+  function parseNum(s) {
+    s = s.replace(/,/g, '').toLowerCase();
+    if (s.endsWith('k')) return Math.round(parseFloat(s) * 1000);
+    return parseInt(s);
+  }
+  function formatNum(n) {
+    if (n >= 1000) return (n/1000).toFixed(1).replace('.0','') + 'k';
+    return n;
+  }
+
+  function toggleFollow(btn) {
+    if (btn.classList.contains('following')) {
+      btn.classList.remove('following');
+      btn.textContent = 'Follow';
+    } else {
+      btn.classList.add('following');
+      btn.textContent = '✓ Following';
+    }
+  }
+
+  function createPost() {
+    const input = document.getElementById('postInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const feed = document.getElementById('feed');
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.style.animationDelay = '0s';
+    card.style.borderColor = 'rgba(124,92,252,0.4)';
+    const tagged = text.replace(/#(\w+)/g, '<span class="post-tag">#$1</span>');
+    card.innerHTML = `
+      <div class="post-header">
+        <div class="avatar">A</div>
+        <div class="post-meta">
+          <div class="name">Aditya Dixit</div>
+          <div class="sub">@adityadixit · Just now</div>
+        </div>
+        <div class="post-menu" onclick="toggleMenu(this)">···</div>
+      </div>
+      <div class="post-text">${tagged}</div>
+      <div class="post-footer">
+        <button class="action-btn" onclick="toggleLike(this)"><span class="ic">🤍</span> 0</button>
+        <button class="action-btn"><span class="ic">💬</span> 0</button>
+        <button class="action-btn"><span class="ic">🔁</span> 0</button>
+        <button class="action-btn action-share"><span class="ic">↗️</span> Share</button>
+      </div>
+    `;
+    feed.prepend(card);
+    input.value = '';
+    setTimeout(() => { card.style.borderColor = ''; }, 2000);
+  }
+
+  function toggleMenu(el) {
+    alert('Options: Edit · Delete · Report · Copy Link');
+  }
+
+  function viewStory(el) {
+    const name = el.querySelector('span').textContent;
+    const ring = el.querySelector('.story-ring');
+    ring.style.background = 'var(--muted)';
+    setTimeout(() => {
+      ring.style.background = 'linear-gradient(135deg, var(--accent), var(--accent2))';
+    }, 800);
+  }
+
+  function focusComment() {
+    document.getElementById('postInput').focus();
+  }
+
+  // Allow Enter without Shift to create post
+  document.getElementById('postInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      createPost();
+    }
+  });
+</script>
+</body>
+</html>
